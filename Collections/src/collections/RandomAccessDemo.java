@@ -31,7 +31,6 @@ public class RandomAccessDemo {
 		}
 
 		System.out.println((System.currentTimeMillis() - t1));
-		// Почему-то время одинаково
 	}
 
 }
