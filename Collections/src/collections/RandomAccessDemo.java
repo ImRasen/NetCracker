@@ -22,12 +22,14 @@ public class RandomAccessDemo {
 		for (int i = 0, n = list1.size(); i < n; i++) {
 			String s = list1.get(i);
 		}
+
+		System.out.println((System.currentTimeMillis() - t0));
+
 		long t1 = System.currentTimeMillis();// get list2
 		for (int i = 0, n = list2.size(); i < n; i++) {
 			String s = list2.get(i);
 		}
 
-		System.out.println((System.currentTimeMillis() - t0));
 		System.out.println((System.currentTimeMillis() - t1));
 		// Почему-то время одинаково
 	}
