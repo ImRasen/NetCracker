@@ -67,9 +67,9 @@ public class ControlFlowStatements1Impl implements ControlFlowStatements1 {
 		double amount = 1000;
 		int year = 0;
 		// wait for goal to be reached
-		while (amount <= 5000) {
+		while (amount < 5000) {
 			year++;
-			amount = (1 + P) * amount;
+			amount = (1 + P / 100) * amount;
 		}
 
 		deposit.years = year;
@@ -77,5 +77,10 @@ public class ControlFlowStatements1Impl implements ControlFlowStatements1 {
 
 		return deposit;
 	}
+
+	// public static void main(String[] args) {
+	// System.out.println(new
+	// ControlFlowStatements1Impl().calculateBankDeposit(12.5).toString());
+	// }
 
 }
