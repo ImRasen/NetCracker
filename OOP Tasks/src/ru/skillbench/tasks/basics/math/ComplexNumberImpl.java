@@ -3,8 +3,13 @@ package ru.skillbench.tasks.basics.math;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumber> {
+public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumber>, Cloneable {
 	private Double re, im;
+
+	public ComplexNumberImpl() {
+		this.re = 0.0;
+		this.im = 0.0;
+	}
 
 	@Override
 	public double getRe() {
@@ -28,7 +33,7 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 	}
 
 	@Override
-	public void set(String value) throws NumberFormatException {
+	public void set(String value) {
 
 		if (value.isEmpty()) {
 			re = 0.0;
@@ -36,6 +41,12 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 			return;
 		}
 
+		// more than 1 'i' in the input
+		if (value.length() - value.replaceAll("i", "").length() > 1) {
+			throw new NumberFormatException();
+		}
+
+		// add '+' if there is no first sign (easier to parse)
 		if (!value.startsWith("+") && !value.startsWith("-")) {
 			value = "+" + value;
 		}
@@ -47,16 +58,52 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 			lastSignIndex = value.lastIndexOf('-');
 		}
 
+		// parsing
 		if (lastSignIndex == 0) {
 			// 1 summand
 			if (value.endsWith("i")) {
 				// 1 imaginary summand
 				re = 0.0;
 				try {
-					im = Double.parseDouble(value.substring(0, value.length() - 1));
+					im = Double.valueOf(value.substring(0, value.length() - 1));
 				} catch (NumberFormatException e) {
 					// .. +i or .. -i
-					switch (value.charAt(0)) {
+					if (value.endsWith("+i")) {
+						im = 1.0;
+						return;
+					}
+					if (value.endsWith("-i")) {
+						im = 1.0;
+						return;
+					}
+					throw new NumberFormatException();
+				}
+			} else {
+				// 1 real summand
+				im = 0.0;
+				try {
+					re = Double.valueOf(value);
+				} catch (NumberFormatException e) {
+					// input like "+ "
+					throw new NumberFormatException();
+				}
+				return;
+			}
+		} else {
+			// 2 summands
+			try {
+				re = Double.valueOf(value.substring(0, lastSignIndex));
+			} catch (NumberFormatException e) {
+				// i in first summand or input like "+ +i"
+				throw new NumberFormatException();
+			}
+			if (value.endsWith("i")) {
+				try {
+					im = Double.valueOf(value.substring(lastSignIndex, value.length() - 1));
+				} catch (NumberFormatException e) {
+
+					// .. +i or .. -i
+					switch (value.charAt(lastSignIndex)) {
 					case '+':
 						im = 1.0;
 						break;
@@ -64,30 +111,10 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 						im = -1.0;
 						break;
 					}
-					return;
 				}
 			} else {
-				// 1 real summand
-				im = 0.0;
-				re = Double.parseDouble(value);
-				return;
-			}
-		} else {
-			// 2 summands
-			re = Double.parseDouble(value.substring(0, lastSignIndex));
-			try {
-				im = Double.parseDouble(value.substring(lastSignIndex, value.length() - 1));
-			} catch (NumberFormatException e) {
-				// .. +i or .. -i
-				switch (value.charAt(lastSignIndex)) {
-				case '+':
-					im = 1.0;
-					break;
-				case '-':
-					im = -1.0;
-					break;
-				}
-				return;
+				// input like "2+3"
+				throw new NumberFormatException();
 			}
 		}
 	}
@@ -99,7 +126,7 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 		return temp;
 	}
 
-	public ComplexNumber clone() throws CloneNotSupportedException {
+	public ComplexNumber clone() {
 		ComplexNumber temp = new ComplexNumberImpl();
 		temp.set(re, im);
 		return (ComplexNumber) temp;
@@ -137,14 +164,15 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 	}
 
 	@Override
-	public int compareTo(ComplexNumber other) throws NullPointerException {
-		if (other == null) {
+	public int compareTo(ComplexNumber other) {
+		try {
+			if (this == other) {
+				return 0;
+			}
+			return (int) (re * re + im * im - other.getRe() * other.getRe() - other.getIm() * other.getIm());
+		} catch (NullPointerException e) {
 			throw new NullPointerException();
 		}
-		if (this == other) {
-			return 0;
-		}
-		return (int) (re * re + im * im - other.getRe() * other.getRe() - other.getIm() * other.getIm());
 	}
 
 	public static Comparator<ComplexNumber> ComplexComparator = new Comparator<ComplexNumber>() {
@@ -180,12 +208,4 @@ public class ComplexNumberImpl implements ComplexNumber, Comparable<ComplexNumbe
 		set(re * arg2.getRe() - im * arg2.getIm(), im * arg2.getRe() + re * arg2.getIm());
 		return this;
 	}
-
-//	public static void main(String[] args) {
-//		ComplexNumberImpl number = new ComplexNumberImpl();
-//		number.set("i");
-//		System.out.println("object re = " + number.re);
-//		System.out.println("object im = " + number.im);
-//		System.out.println(number.toString());
-//	}
 }
